@@ -64,15 +64,31 @@ The policy should be specifically tailored to this organization's context and in
 Make sure to reference Crimson IT as the designated MSP and MSSP throughout the policy where appropriate."""
 
         openai_client = get_openai_client()
-        response = openai_client.chat.completions.create(
-            model="gpt-5-chat",
-            messages=[
-                {"role": "system", "content": "You are an expert cybersecurity policy writer with deep knowledge of NIST frameworks, SOC 2, ISO 27001, CMMC, and industry best practices."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=4000,
-            temperature=0.7
-        )
+        
+        # Try different model names in order of preference
+        model_names = ["gpt-5-chat", "gpt-4", "gpt-35-turbo", "gpt-4o"]
+        
+        response = None
+        last_error = None
+        
+        for model_name in model_names:
+            try:
+                response = openai_client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": "You are an expert cybersecurity policy writer with deep knowledge of NIST frameworks, SOC 2, ISO 27001, CMMC, and industry best practices."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=4000,
+                    temperature=0.7
+                )
+                break  # Success, exit the loop
+            except Exception as model_error:
+                last_error = f"Model {model_name}: {str(model_error)}"
+                continue  # Try next model
+        
+        if response is None:
+            raise Exception(f"All models failed. Last error: {last_error}")
         
         content = response.choices[0].message.content
         
@@ -239,7 +255,7 @@ def generate_policy():
         policy_content = generate_policy_content(form_data)
         
         if policy_content.startswith("Error generating policy content:"):
-            return jsonify({'error': 'Failed to generate policy content'}), 500
+            return jsonify({'error': policy_content}), 500
         
         # Create Word document
         doc = create_word_document(form_data, policy_content)
@@ -271,15 +287,41 @@ def health():
         api_key = os.getenv('AZURE_OPENAI_API_KEY')
         endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
         
-        return {
+        health_info = {
             "status": "healthy", 
-            "version": "2.0.1",
+            "version": "2.0.2",
             "openai_configured": bool(api_key and endpoint),
             "env_check": {
                 "api_key_present": bool(api_key),
                 "endpoint_present": bool(endpoint)
             }
         }
+        
+        # Test OpenAI connection if configured
+        if api_key and endpoint:
+            try:
+                client = get_openai_client()
+                # Try a simple test with each model
+                test_results = {}
+                model_names = ["gpt-5-chat", "gpt-4", "gpt-35-turbo", "gpt-4o"]
+                
+                for model in model_names:
+                    try:
+                        response = client.chat.completions.create(
+                            model=model,
+                            messages=[{"role": "user", "content": "Hello"}],
+                            max_tokens=5
+                        )
+                        test_results[model] = "available"
+                    except Exception as e:
+                        test_results[model] = f"error: {str(e)}"
+                
+                health_info["model_availability"] = test_results
+                
+            except Exception as e:
+                health_info["openai_test_error"] = str(e)
+        
+        return health_info
     except Exception as e:
         return {"status": "error", "error": str(e)}, 500
 
