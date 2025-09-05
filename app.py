@@ -21,20 +21,12 @@ def get_openai_client():
         if not api_key or not endpoint:
             raise ValueError("Azure OpenAI credentials not configured")
             
-        try:
-            # Try the newer client first
-            client = AzureOpenAI(
-                api_key=api_key,
-                api_version="2024-02-15-preview",
-                azure_endpoint=endpoint
-            )
-        except Exception as e:
-            # Fallback to simpler initialization
-            client = AzureOpenAI(
-                api_key=api_key,
-                api_version="2023-12-01-preview",
-                azure_endpoint=endpoint
-            )
+        # Use exact configuration from Azure AI Foundry
+        client = AzureOpenAI(
+            api_version="2024-12-01-preview",
+            azure_endpoint=endpoint,
+            api_key=api_key
+        )
     return client
 
 @app.route('/')
@@ -74,8 +66,8 @@ Make sure to reference Crimson IT as the designated MSP and MSSP throughout the 
 
         openai_client = get_openai_client()
         
-        # Try different model names in order of preference
-        model_names = ["gpt-5-chat", "gpt-4", "gpt-35-turbo", "gpt-4o"]
+        # Try different model names in order of preference (common Azure deployment names)
+        model_names = ["gpt-4", "gpt-35-turbo", "gpt-4o", "gpt-5-chat", "gpt-4-turbo"]
         
         response = None
         last_error = None
@@ -312,7 +304,7 @@ def health():
                 client = get_openai_client()
                 # Try a simple test with each model
                 test_results = {}
-                model_names = ["gpt-5-chat", "gpt-4", "gpt-35-turbo", "gpt-4o"]
+                model_names = ["gpt-4", "gpt-35-turbo", "gpt-4o", "gpt-5-chat", "gpt-4-turbo"]
                 
                 for model in model_names:
                     try:
