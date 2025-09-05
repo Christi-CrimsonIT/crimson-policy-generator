@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, send_file
 import os
-from openai import AzureOpenAI
+import openai
 from docx import Document
 from docx.shared import Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -9,25 +9,18 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Configure OpenAI for CrimsonAI hub - initialize lazily to avoid startup issues
-client = None
-
-def get_openai_client():
-    global client
-    if client is None:
-        api_key = os.getenv('AZURE_OPENAI_API_KEY')
-        endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
-        
-        if not api_key or not endpoint:
-            raise ValueError("Azure OpenAI credentials not configured")
-            
-        # Use exact configuration from Azure AI Foundry
-        client = AzureOpenAI(
-            api_version="2024-12-01-preview",
-            azure_endpoint=endpoint,
-            api_key=api_key
-        )
-    return client
+# Configure OpenAI for CrimsonAI hub using stable v0.28.1 API
+def configure_openai():
+    api_key = os.getenv('AZURE_OPENAI_API_KEY')
+    endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+    
+    if not api_key or not endpoint:
+        raise ValueError("Azure OpenAI credentials not configured")
+    
+    openai.api_type = "azure"
+    openai.api_key = api_key
+    openai.api_base = endpoint
+    openai.api_version = "2024-12-01-preview"
 
 @app.route('/')
 def home():
@@ -64,7 +57,7 @@ The policy should be specifically tailored to this organization's context and in
 
 Make sure to reference Crimson IT as the designated MSP and MSSP throughout the policy where appropriate."""
 
-        openai_client = get_openai_client()
+        configure_openai()
         
         # Try your exact Azure deployment names first
         model_names = ["gpt-5-chat", "gpt-4o"]
@@ -74,8 +67,8 @@ Make sure to reference Crimson IT as the designated MSP and MSSP throughout the 
         
         for model_name in model_names:
             try:
-                response = openai_client.chat.completions.create(
-                    model=model_name,
+                response = openai.ChatCompletion.create(
+                    engine=model_name,
                     messages=[
                         {"role": "system", "content": "You are an expert cybersecurity policy writer with deep knowledge of NIST frameworks, SOC 2, ISO 27001, CMMC, and industry best practices."},
                         {"role": "user", "content": prompt}
@@ -301,15 +294,15 @@ def health():
         # Test OpenAI connection if configured
         if api_key and endpoint:
             try:
-                client = get_openai_client()
+                configure_openai()
                 # Try a simple test with each model
                 test_results = {}
                 model_names = ["gpt-5-chat", "gpt-4o"]
                 
                 for model in model_names:
                     try:
-                        response = client.chat.completions.create(
-                            model=model,
+                        response = openai.ChatCompletion.create(
+                            engine=model,
                             messages=[{"role": "user", "content": "Hello"}],
                             max_tokens=5
                         )
