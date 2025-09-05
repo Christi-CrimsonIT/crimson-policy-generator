@@ -36,6 +36,14 @@ def generate_policy_content(form_data):
 
 The language should be professional, clear, and non-technical. Avoid legal jargon or redundant statements.
 
+IMPORTANT FORMATTING REQUIREMENTS:
+- Do NOT include any conversational responses like "Certainly", "Here is", etc.
+- Use ONLY H1 and H2 headings, no bold text (**text**)  
+- Do NOT use em dashes (—), use regular hyphens (-) instead
+- Start directly with the policy content, no introductory text
+- Use simple bullet points with hyphens (-) not special characters
+- Keep formatting clean and professional
+
 Generate a comprehensive {form_data['policy_type']} for the following organization:
 
 Client: {form_data['client_name']}
@@ -86,18 +94,31 @@ Make sure to reference Crimson IT as the designated MSP and MSSP throughout the 
         
         content = response.choices[0].message.content
         
-        # Clean up the response - remove conversational elements
+        # Clean up the response - remove conversational elements and formatting issues
         # Remove common AI prefixes
         prefixes_to_remove = [
-            "Certainly!", "Certainly,", "Sure!", "Sure,", "Of course!", "Of course,",
+            "Certainly!", "Certainly,", "Certainly.", "Sure!", "Sure,", "Of course!", "Of course,",
             "Here is", "Here's", "Below is", "I'll", "I can", "Let me", "I'd be happy to",
-            "Here you go", "Absolutely!", "Absolutely,", "No problem!", "No problem,"
+            "Here you go", "Absolutely!", "Absolutely,", "No problem!", "No problem,",
+            "I have aligned", "I have created", "This policy", "The following"
         ]
         
         for prefix in prefixes_to_remove:
             if content.strip().startswith(prefix):
                 content = content.strip()[len(prefix):].strip()
                 break
+        
+        # Remove em dashes and replace with hyphens
+        content = content.replace('—', '-')
+        content = content.replace('–', '-')
+        
+        # Remove bold formatting markers
+        content = content.replace('**', '')
+        
+        # Clean up bullet points - standardize to hyphens
+        content = content.replace('•', '-')
+        content = content.replace('◦', '-')
+        content = content.replace('▪', '-')
         
         # Remove common AI suffixes and additional offers
         lines = content.split('\n')
@@ -109,8 +130,16 @@ Make sure to reference Crimson IT as the designated MSP and MSSP throughout the 
             if any(phrase in line.lower() for phrase in [
                 "if you'd like", "would you like", "let me know if", "feel free to",
                 "i can also", "i'd be happy to", "please let me know",
-                "if you need", "would you prefer", "shall i", "do you want"
+                "if you need", "would you prefer", "shall i", "do you want",
+                "comprehensive information security policy", "tailored to the organization",
+                "i have aligned", "aligned it with", "below is a", "here is a"
             ]):
+                continue
+            # Skip lines that are just formatting artifacts
+            if line in ['--', '____________________________________________________________', '•', '◦', '▪']:
+                continue
+            # Skip duplicate title lines
+            if line.lower().startswith('abilityfirst') and 'information security policy' in line.lower():
                 continue
             if line:
                 cleaned_lines.append(line)
