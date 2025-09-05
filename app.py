@@ -207,10 +207,26 @@ def generate_policy():
             'industry': request.form.get('industry', '').strip(),
             'company_size': request.form.get('company_size', '').strip(),
             'policy_type': request.form.get('policy_type', '').strip(),
-            'tech_stack': request.form.get('tech_stack', '').strip(),
             'compliance_requirements': request.form.get('compliance_requirements', '').strip(),
             'additional_requirements': request.form.get('additional_requirements', '').strip()
         }
+        
+        # Collect technology stack from individual dropdown fields
+        tech_components = []
+        tech_fields = [
+            'platform_choice', 'endpoint_security', 'email_security', 'siem_solution',
+            'pam_solution', 'encryption_solution', 'mdm_solution', 'security_training',
+            'phishing_testing', 'dark_web_monitoring', 'mfa_solution', 'password_manager',
+            'intrusion_detection', 'backup_solution', 'vulnerability_management'
+        ]
+        
+        for field in tech_fields:
+            value = request.form.get(field, '').strip()
+            if value and value != 'None':
+                tech_components.append(value)
+        
+        # Combine all technology selections into tech_stack
+        form_data['tech_stack'] = ', '.join(tech_components) if tech_components else 'Standard business technology stack'
         
         # Validate required fields
         required_fields = ['client_name', 'industry', 'company_size', 'policy_type', 'tech_stack']
