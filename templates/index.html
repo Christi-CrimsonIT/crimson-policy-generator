@@ -16,50 +16,205 @@
         }
         
         body {
-            background: #ffffff;
+            background-color: white;
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             position: relative;
             overflow-x: hidden;
         }
         
-        /* Background Squares Container */
-        .background-squares {
+        /* Improved Background Container */
+        .background-container {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+            width: 100vw;
+            height: 100vh;
             z-index: -1;
-            animation: float-squares 30s ease-in-out infinite;
+            pointer-events: none;
         }
         
-        /* Individual Square Styles */
+        /* Accent colors in the very back */
+        .accent-green {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background-color: #3A8B6B;
+            opacity: 0.15;
+            top: 15%;
+            left: 10%;
+            transform: rotate(15deg);
+        }
+
+        .accent-yellow {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background-color: #FFB71B;
+            opacity: 0.12;
+            bottom: 20%;
+            right: 15%;
+            transform: rotate(-20deg);
+        }
+        
+        /* Crimson squares with varying sizes and opacities */
         .square {
             position: absolute;
-            animation: gentle-float 25s ease-in-out infinite;
+            background-color: #7F2346;
+        }
+
+        .square.dark {
+            background-color: #691C32;
         }
         
-        /* Large Accent Squares (back layer) */
-        .square-accent-green {
+        /* Large squares */
+        .square-1 {
             width: 120px;
             height: 120px;
-            background-color: var(--accent-green);
-            opacity: 0.4;
-            top: 20%;
-            left: 12%;
-            animation-delay: 0s;
+            top: 10%;
+            left: 20%;
+            opacity: 0.3;
+            transform: rotate(25deg);
         }
-        
-        .square-accent-gold {
+
+        .square-2 {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            right: 25%;
+            opacity: 0.25;
+            transform: rotate(-15deg);
+        }
+
+        .square-3 {
             width: 100px;
             height: 100px;
-            background-color: var(--accent-gold);
+            bottom: 15%;
+            left: 15%;
+            opacity: 0.4;
+            transform: rotate(45deg);
+        }
+
+        .square-4 {
+            width: 130px;
+            height: 130px;
+            top: 35%;
+            left: 60%;
+            opacity: 0.2;
+            transform: rotate(-30deg);
+        }
+
+        .square-5 {
+            width: 110px;
+            height: 110px;
+            top: 20%;
+            right: 10%;
             opacity: 0.35;
+            transform: rotate(60deg);
+        }
+
+        /* Medium squares */
+        .square-6 {
+            width: 80px;
+            height: 80px;
+            top: 45%;
+            left: 35%;
+            opacity: 0.3;
+            transform: rotate(-45deg);
+        }
+
+        .square-7 {
+            width: 90px;
+            height: 90px;
+            bottom: 40%;
+            right: 40%;
+            opacity: 0.25;
+            transform: rotate(20deg);
+        }
+
+        .square-8 {
+            width: 70px;
+            height: 70px;
             top: 70%;
-            right: 15%;
-            animation-delay: 8s;
+            left: 45%;
+            opacity: 0.4;
+            transform: rotate(-60deg);
+        }
+
+        .square-9 {
+            width: 85px;
+            height: 85px;
+            top: 15%;
+            left: 75%;
+            opacity: 0.2;
+            transform: rotate(35deg);
+        }
+
+        /* Smaller squares */
+        .square-10 {
+            width: 50px;
+            height: 50px;
+            bottom: 30%;
+            left: 70%;
+            opacity: 0.45;
+            transform: rotate(-25deg);
+        }
+
+        .square-11 {
+            width: 60px;
+            height: 60px;
+            top: 80%;
+            right: 20%;
+            opacity: 0.3;
+            transform: rotate(50deg);
+        }
+
+        .square-12 {
+            width: 45px;
+            height: 45px;
+            top: 50%;
+            right: 5%;
+            opacity: 0.35;
+            transform: rotate(-40deg);
+        }
+
+        .square-13 {
+            width: 55px;
+            height: 55px;
+            bottom: 60%;
+            left: 5%;
+            opacity: 0.25;
+            transform: rotate(70deg);
+        }
+
+        .square-14 {
+            width: 65px;
+            height: 65px;
+            top: 25%;
+            left: 40%;
+            opacity: 0.4;
+            transform: rotate(-10deg);
+        }
+
+        .square-15 {
+            width: 40px;
+            height: 40px;
+            bottom: 10%;
+            right: 35%;
+            opacity: 0.5;
+            transform: rotate(80deg);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .square {
+                transform: scale(0.7);
+            }
+            
+            .accent-green,
+            .accent-yellow {
+                transform: scale(0.6);
+            }
         }
         
         /* Large Crimson Squares */
@@ -295,30 +450,28 @@
     </style>
 </head>
 <body>
-    <!-- Background Squares -->
-    <div class="background-squares">
-        <!-- Accent squares (back layer) -->
-        <div class="square square-accent-green"></div>
-        <div class="square square-accent-gold"></div>
+    <!-- Improved Background Design -->
+    <div class="background-container">
+        <!-- Accent colors in the very back -->
+        <div class="accent-green"></div>
+        <div class="accent-yellow"></div>
         
-        <!-- Large Crimson squares -->
-        <div class="square square-large-1"></div>
-        <div class="square square-large-2"></div>
-        <div class="square square-large-3"></div>
-        
-        <!-- Medium squares -->
-        <div class="square square-medium-1"></div>
-        <div class="square square-medium-2"></div>
-        <div class="square square-medium-3"></div>
-        <div class="square square-medium-4"></div>
-        
-        <!-- Small squares -->
-        <div class="square square-small-1"></div>
-        <div class="square square-small-2"></div>
-        <div class="square square-small-3"></div>
-        <div class="square square-small-4"></div>
-        <div class="square square-small-5"></div>
-        <div class="square square-small-6"></div>
+        <!-- Crimson squares with varying sizes and opacities -->
+        <div class="square square-1"></div>
+        <div class="square square-2 dark"></div>
+        <div class="square square-3"></div>
+        <div class="square square-4 dark"></div>
+        <div class="square square-5"></div>
+        <div class="square square-6 dark"></div>
+        <div class="square square-7"></div>
+        <div class="square square-8 dark"></div>
+        <div class="square square-9"></div>
+        <div class="square square-10 dark"></div>
+        <div class="square square-11"></div>
+        <div class="square square-12 dark"></div>
+        <div class="square square-13"></div>
+        <div class="square square-14 dark"></div>
+        <div class="square square-15"></div>
     </div>
     
     <div class="header">
