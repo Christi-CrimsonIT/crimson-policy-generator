@@ -9,12 +9,24 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Configure OpenAI for CrimsonAI hub
-client = AzureOpenAI(
-    api_key=os.getenv('AZURE_OPENAI_API_KEY'),
-    api_version="2024-02-15-preview",
-    azure_endpoint=os.getenv('AZURE_OPENAI_ENDPOINT')
-)
+# Configure OpenAI for CrimsonAI hub - initialize lazily to avoid startup issues
+client = None
+
+def get_openai_client():
+    global client
+    if client is None:
+        api_key = os.getenv('AZURE_OPENAI_API_KEY')
+        endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+        
+        if not api_key or not endpoint:
+            raise ValueError("Azure OpenAI credentials not configured")
+            
+        client = AzureOpenAI(
+            api_key=api_key,
+            api_version="2024-02-15-preview",
+            azure_endpoint=endpoint
+        )
+    return client
 
 @app.route('/')
 def home():
@@ -51,7 +63,8 @@ The policy should be specifically tailored to this organization's context and in
 
 Make sure to reference Crimson IT as the designated MSP and MSSP throughout the policy where appropriate."""
 
-        response = client.chat.completions.create(
+        openai_client = get_openai_client()
+        response = openai_client.chat.completions.create(
             model="gpt-5-chat",
             messages=[
                 {"role": "system", "content": "You are an expert cybersecurity policy writer with deep knowledge of NIST frameworks, SOC 2, ISO 27001, CMMC, and industry best practices."},
@@ -237,7 +250,22 @@ def generate_policy():
 
 @app.route('/health')
 def health():
-    return {"status": "healthy", "version": "2.0.0"}
+    try:
+        # Check if environment variables are available
+        api_key = os.getenv('AZURE_OPENAI_API_KEY')
+        endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+        
+        return {
+            "status": "healthy", 
+            "version": "2.0.1",
+            "openai_configured": bool(api_key and endpoint),
+            "env_check": {
+                "api_key_present": bool(api_key),
+                "endpoint_present": bool(endpoint)
+            }
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}, 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
