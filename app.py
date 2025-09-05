@@ -21,11 +21,20 @@ def get_openai_client():
         if not api_key or not endpoint:
             raise ValueError("Azure OpenAI credentials not configured")
             
-        client = AzureOpenAI(
-            api_key=api_key,
-            api_version="2024-02-15-preview",
-            azure_endpoint=endpoint
-        )
+        try:
+            # Try the newer client first
+            client = AzureOpenAI(
+                api_key=api_key,
+                api_version="2024-02-15-preview",
+                azure_endpoint=endpoint
+            )
+        except Exception as e:
+            # Fallback to simpler initialization
+            client = AzureOpenAI(
+                api_key=api_key,
+                api_version="2023-12-01-preview",
+                azure_endpoint=endpoint
+            )
     return client
 
 @app.route('/')
