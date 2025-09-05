@@ -66,8 +66,8 @@ Make sure to reference Crimson IT as the designated MSP and MSSP throughout the 
 
         openai_client = get_openai_client()
         
-        # Try different model names in order of preference (common Azure deployment names)
-        model_names = ["gpt-4", "gpt-35-turbo", "gpt-4o", "gpt-5-chat", "gpt-4-turbo"]
+        # Try your exact Azure deployment names first
+        model_names = ["gpt-5-chat", "gpt-4o"]
         
         response = None
         last_error = None
@@ -304,7 +304,7 @@ def health():
                 client = get_openai_client()
                 # Try a simple test with each model
                 test_results = {}
-                model_names = ["gpt-4", "gpt-35-turbo", "gpt-4o", "gpt-5-chat", "gpt-4-turbo"]
+                model_names = ["gpt-5-chat", "gpt-4o"]
                 
                 for model in model_names:
                     try:
