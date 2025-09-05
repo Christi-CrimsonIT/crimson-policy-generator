@@ -214,10 +214,10 @@ def generate_policy():
         # Collect technology stack from individual dropdown fields
         tech_components = []
         tech_fields = [
-            'platform_choice', 'endpoint_security', 'email_security', 'siem_solution',
-            'pam_solution', 'encryption_solution', 'mdm_solution', 'security_training',
-            'phishing_testing', 'dark_web_monitoring', 'mfa_solution', 'password_manager',
-            'intrusion_detection', 'backup_solution', 'vulnerability_management'
+            'platform_choice', 'mdr_solution', 'email_security', 'siem_solution',
+            'pam_solution', 'disk_encryption', 'mdm_computers', 'mdm_mobile', 'security_training',
+            'phishing_tests', 'vulnerability_scans', 'dark_web_monitoring', 'mfa_solution', 
+            'password_manager', 'intrusion_detection', 'additional_tech'
         ]
         
         for field in tech_fields:
