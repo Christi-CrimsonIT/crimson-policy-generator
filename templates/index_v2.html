@@ -208,6 +208,24 @@
             border-radius: 8px;
             border: 1px solid rgba(58, 139, 107, 0.3);
         }
+
+        /* Collapsible section styling */
+        .form-section h4 a {
+            color: var(--crimson-primary);
+            cursor: pointer;
+        }
+
+        .form-section h4 a:hover {
+            color: var(--crimson-secondary);
+        }
+
+        .form-section h4 a .fa-chevron-down {
+            transition: transform 0.3s ease;
+        }
+
+        .form-section h4 a[aria-expanded="true"] .fa-chevron-down {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
 <body>
@@ -433,8 +451,19 @@
                 </div>
 
                 <div class="form-section">
-                    <h4><i class="fas fa-server me-2"></i>Security Technology Stack</h4>
+                    <h4>
+                        <a class="d-flex justify-content-between align-items-center text-decoration-none" data-bs-toggle="collapse" href="#techStackCollapse" role="button" aria-expanded="false" aria-controls="techStackCollapse">
+                            <span>
+                                <i class="fas fa-server me-2"></i>Security Technology Stack
+                                <span id="tech_stack_badge" class="badge bg-success ms-2" style="display: none;">
+                                    <i class="fas fa-check"></i> <span id="tech_stack_count">0</span> fields auto-filled
+                                </span>
+                            </span>
+                            <i class="fas fa-chevron-down"></i>
+                        </a>
+                    </h4>
 
+                    <div class="collapse" id="techStackCollapse">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="platform_choice" class="form-label">Primary Platform *</label>
@@ -600,8 +629,10 @@
                                     placeholder="Any additional security technologies or special configurations..."></textarea>
                         </div>
                     </div>
+                    </div><!-- End collapse -->
 
-                    <div class="mb-3">
+                    <!-- Compliance Requirements - Always visible -->
+                    <div class="mt-3">
                         <label for="compliance_requirements" class="form-label">Compliance Requirements</label>
                         <select class="form-select" id="compliance_requirements" name="compliance_requirements">
                             <option value="">Select Framework (Optional)</option>
@@ -799,6 +830,13 @@
                           'vulnerability_scans', 'dark_web_monitoring', 'mfa_solution',
                           'password_manager', 'intrusion_detection', 'compliance_requirements'];
 
+            var techStackFields = ['platform_choice', 'mdr_solution', 'email_security', 'siem_solution',
+                                   'pam_solution', 'disk_encryption', 'mdm_computers', 'mdm_mobile',
+                                   'security_training', 'phishing_tests', 'vulnerability_scans',
+                                   'dark_web_monitoring', 'mfa_solution', 'password_manager', 'intrusion_detection'];
+
+            var techStackCount = 0;
+
             fields.forEach(function(fieldName) {
                 if (formData[fieldName]) {
                     var $field = $('#' + fieldName);
@@ -809,8 +847,20 @@
                     if ($badge.length) {
                         $badge.show();
                     }
+
+                    // Count tech stack fields that were populated
+                    if (techStackFields.indexOf(fieldName) !== -1) {
+                        techStackCount++;
+                    }
                 }
             });
+
+            // If tech stack fields were populated, expand the section and show badge
+            if (techStackCount > 0) {
+                $('#techStackCollapse').collapse('show');
+                $('#tech_stack_badge').show();
+                $('#tech_stack_count').text(techStackCount);
+            }
 
             $('html, body').animate({
                 scrollTop: $('#client_name').offset().top - 100
@@ -820,6 +870,8 @@
         function clearAutoFilledFields() {
             $('.auto-populated').removeClass('auto-populated');
             $('.badge').hide();
+            $('#techStackCollapse').collapse('hide');
+            $('#tech_stack_count').text('0');
         }
 
         function showNotification(type, message) {
