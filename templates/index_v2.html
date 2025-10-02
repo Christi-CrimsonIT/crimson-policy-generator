@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crimson IT - Policy Generator v2.0</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Select2 for searchable dropdown -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --crimson-primary: #7F2346;
+            --crimson-secondary: #691C32;
+            --accent-green: #3A8B6B;
+            --accent-gold: #FFB71B;
+            --crimson-light: rgba(127, 35, 70, 0.1);
+        }
+
+        body {
+            background-color: white;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Container */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .accent-green {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background-color: #3A8B6B;
+            opacity: 0.15;
+            top: 15%;
+            left: 10%;
+            transform: rotate(15deg);
+        }
+
+        .accent-yellow {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background-color: #FFB71B;
+            opacity: 0.12;
+            bottom: 20%;
+            right: 15%;
+            transform: rotate(-20deg);
+        }
+
+        .square {
+            position: absolute;
+            background-color: #7F2346;
+        }
+
+        .square.dark {
+            background-color: #691C32;
+        }
+
+        .square-1 { width: 120px; height: 120px; top: 10%; left: 20%; opacity: 0.3; transform: rotate(25deg); }
+        .square-2 { width: 150px; height: 150px; top: 60%; right: 25%; opacity: 0.25; transform: rotate(-15deg); }
+        .square-3 { width: 100px; height: 100px; bottom: 15%; left: 15%; opacity: 0.4; transform: rotate(45deg); }
+        .square-4 { width: 130px; height: 130px; top: 35%; left: 60%; opacity: 0.2; transform: rotate(-30deg); }
+        .square-5 { width: 110px; height: 110px; top: 20%; right: 10%; opacity: 0.35; transform: rotate(60deg); }
+        .square-6 { width: 80px; height: 80px; top: 45%; left: 35%; opacity: 0.3; transform: rotate(-45deg); }
+        .square-7 { width: 90px; height: 90px; bottom: 40%; right: 40%; opacity: 0.25; transform: rotate(20deg); }
+        .square-8 { width: 70px; height: 70px; top: 70%; left: 45%; opacity: 0.4; transform: rotate(-60deg); }
+        .square-9 { width: 85px; height: 85px; top: 15%; left: 75%; opacity: 0.2; transform: rotate(35deg); }
+        .square-10 { width: 50px; height: 50px; bottom: 30%; left: 70%; opacity: 0.45; transform: rotate(-25deg); }
+        .square-11 { width: 60px; height: 60px; top: 80%; right: 20%; opacity: 0.3; transform: rotate(50deg); }
+        .square-12 { width: 45px; height: 45px; top: 50%; right: 5%; opacity: 0.35; transform: rotate(-40deg); }
+        .square-13 { width: 55px; height: 55px; bottom: 60%; left: 5%; opacity: 0.25; transform: rotate(70deg); }
+        .square-14 { width: 65px; height: 65px; top: 25%; left: 40%; opacity: 0.4; transform: rotate(-10deg); }
+        .square-15 { width: 40px; height: 40px; bottom: 10%; right: 35%; opacity: 0.5; transform: rotate(80deg); }
+
+        @media (max-width: 768px) {
+            .square { transform: scale(0.7); }
+            .accent-green, .accent-yellow { transform: scale(0.6); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--crimson-primary) 0%, var(--crimson-secondary) 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(127, 35, 70, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .policy-form {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(127, 35, 70, 0.15);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(127, 35, 70, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(127, 35, 70, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            position: relative;
+        }
+
+        .form-section h4 {
+            color: var(--crimson-primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--crimson-primary) 0%, var(--crimson-secondary) 100%);
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(127, 35, 70, 0.4);
+            background: linear-gradient(135deg, var(--crimson-secondary) 0%, var(--crimson-primary) 100%);
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            transition: border-color 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--crimson-primary);
+            box-shadow: 0 0 0 0.2rem rgba(127, 35, 70, 0.25);
+            background: #ffffff;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+        }
+
+        /* Select2 Styling */
+        .select2-container--bootstrap-5 .select2-selection {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            min-height: 48px;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            padding-left: 0;
+            color: #1f2937;
+        }
+
+        .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+            border-color: var(--crimson-primary);
+            box-shadow: 0 0 0 0.2rem rgba(127, 35, 70, 0.25);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid var(--crimson-primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .auto-populated {
+            background-color: rgba(58, 139, 107, 0.1) !important;
+            border-color: var(--accent-green) !important;
+        }
+
+        .save-to-itglue-section {
+            background: linear-gradient(135deg, rgba(58, 139, 107, 0.1) 0%, rgba(127, 35, 70, 0.05) 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(58, 139, 107, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="accent-green"></div>
+        <div class="accent-yellow"></div>
+        <div class="square square-1"></div>
+        <div class="square square-2 dark"></div>
+        <div class="square square-3"></div>
+        <div class="square square-4 dark"></div>
+        <div class="square square-5"></div>
+        <div class="square square-6 dark"></div>
+        <div class="square square-7"></div>
+        <div class="square square-8 dark"></div>
+        <div class="square square-9"></div>
+        <div class="square square-10 dark"></div>
+        <div class="square square-11"></div>
+        <div class="square square-12 dark"></div>
+        <div class="square square-13"></div>
+        <div class="square square-14 dark"></div>
+        <div class="square square-15"></div>
+    </div>
+
+    <div class="header">
+        <div class="container">
+            <div class="text-center">
+                <h1><i class="fas fa-shield-alt me-3"></i>Crimson IT Policy Generator v2.0</h1>
+                <p class="lead">Generate NIST-compliant cybersecurity policies with IT Glue integration</p>
+                <div class="mt-3">
+                    <span class="badge bg-light text-dark me-2"><i class="fas fa-check me-1"></i>NIST 800-53</span>
+                    <span class="badge bg-light text-dark me-2"><i class="fas fa-check me-1"></i>SOC 2</span>
+                    <span class="badge bg-light text-dark me-2"><i class="fas fa-check me-1"></i>CIS Controls</span>
+                    <span class="badge bg-success text-white"><i class="fas fa-magic me-1"></i>IT Glue Auto-Fill</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="policy-form">
+            <form id="policyForm" method="POST" action="/generate_policy">
+                <div class="form-section">
+                    <h4><i class="fas fa-building me-2"></i>Client Information</h4>
+
+                    <!-- IT Glue Organization Selector -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info d-flex align-items-center">
+                                <i class="fas fa-magic me-2"></i>
+                                <strong>NEW in v2.0:</strong> Select a client from IT Glue to auto-populate all fields!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <label for="itglue_org_selector" class="form-label">
+                                <i class="fas fa-search me-2"></i>Search IT Glue Clients (Optional)
+                            </label>
+                            <select class="form-select" id="itglue_org_selector" name="itglue_org_selector">
+                                <option value="">-- Select a client from IT Glue --</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Start typing to search. Selecting a client will auto-fill all fields below with IT Glue data.
+                            </small>
+                            <div id="loading-indicator" style="display: none;">
+                                <span class="loading-spinner"></span>
+                                <span class="ms-2">Loading organizations from IT Glue...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden field to store selected org ID -->
+                    <input type="hidden" id="itglue_org_id" name="itglue_org_id" value="">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="client_name" class="form-label">
+                                Client Name *
+                                <span id="client_name_badge" class="badge bg-success ms-2" style="display: none;">
+                                    <i class="fas fa-check"></i> Auto-filled
+                                </span>
+                            </label>
+                            <input type="text" class="form-control" id="client_name" name="client_name" required>
+                            <small class="form-text text-muted">Or enter manually if not in IT Glue</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="industry" class="form-label">
+                                Industry *
+                                <span id="industry_badge" class="badge bg-success ms-2" style="display: none;">
+                                    <i class="fas fa-check"></i> Auto-filled
+                                </span>
+                            </label>
+                            <select class="form-select" id="industry" name="industry" required>
+                                <option value="">Select Industry</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Financial Services">Financial Services</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Education">Education</option>
+                                <option value="Legal">Legal</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="company_size" class="form-label">
+                                Company Size *
+                                <span id="company_size_badge" class="badge bg-success ms-2" style="display: none;">
+                                    <i class="fas fa-check"></i> Auto-filled
+                                </span>
+                            </label>
+                            <select class="form-select" id="company_size" name="company_size" required>
+                                <option value="">Select Size</option>
+                                <option value="Small (1-50 employees)">Small (1-50 employees)</option>
+                                <option value="Medium (51-250 employees)">Medium (51-250 employees)</option>
+                                <option value="Large (251-1000 employees)">Large (251-1000 employees)</option>
+                                <option value="Enterprise (1000+ employees)">Enterprise (1000+ employees)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="policy_type" class="form-label">Policy Type *</label>
+                            <select class="form-select" id="policy_type" name="policy_type" required>
+                                <option value="">Select Policy Type</option>
+                                <optgroup label="Core Security Policies">
+                                    <option value="Corporate IT Security Policy">Corporate IT Security Policy</option>
+                                    <option value="Information Security Policy">Information Security Policy</option>
+                                    <option value="Cybersecurity Policy">Cybersecurity Policy</option>
+                                    <option value="IT Risk Management Policy">IT Risk Management Policy</option>
+                                </optgroup>
+                                <optgroup label="Access & Identity Management">
+                                    <option value="Access Control Policy">Access Control Policy</option>
+                                    <option value="Identity and Access Management Policy">Identity and Access Management Policy</option>
+                                    <option value="Privileged Access Management Policy">Privileged Access Management Policy</option>
+                                    <option value="Password Policy">Password Policy</option>
+                                    <option value="Multi-Factor Authentication Policy">Multi-Factor Authentication Policy</option>
+                                    <option value="Account Management Policy">Account Management Policy</option>
+                                </optgroup>
+                                <optgroup label="Data Protection & Privacy">
+                                    <option value="Data Protection Policy">Data Protection Policy</option>
+                                    <option value="Data Classification Policy">Data Classification Policy</option>
+                                    <option value="Data Loss Prevention Policy">Data Loss Prevention Policy</option>
+                                    <option value="Data Retention Policy">Data Retention Policy</option>
+                                    <option value="Privacy Policy">Privacy Policy</option>
+                                    <option value="Data Backup and Recovery Policy">Data Backup and Recovery Policy</option>
+                                </optgroup>
+                                <optgroup label="Network & Infrastructure">
+                                    <option value="Network Security Policy">Network Security Policy</option>
+                                    <option value="Firewall Management Policy">Firewall Management Policy</option>
+                                    <option value="Wireless Network Policy">Wireless Network Policy</option>
+                                    <option value="Network Access Control Policy">Network Access Control Policy</option>
+                                    <option value="VPN Policy">VPN Policy</option>
+                                    <option value="Cloud Security Policy">Cloud Security Policy</option>
+                                </optgroup>
+                                <optgroup label="Endpoint & Device Management">
+                                    <option value="Endpoint Security Policy">Endpoint Security Policy</option>
+                                    <option value="Mobile Device Management Policy">Mobile Device Management Policy</option>
+                                    <option value="BYOD Policy">BYOD Policy</option>
+                                    <option value="Asset Management Policy">Asset Management Policy</option>
+                                    <option value="Software Asset Management Policy">Software Asset Management Policy</option>
+                                </optgroup>
+                                <optgroup label="Operations & Monitoring">
+                                    <option value="Security Monitoring Policy">Security Monitoring Policy</option>
+                                    <option value="Log Management Policy">Log Management Policy</option>
+                                    <option value="Vulnerability Management Policy">Vulnerability Management Policy</option>
+                                    <option value="Patch Management Policy">Patch Management Policy</option>
+                                    <option value="Change Management Policy">Change Management Policy</option>
+                                    <option value="Configuration Management Policy">Configuration Management Policy</option>
+                                </optgroup>
+                                <optgroup label="Incident Response & Recovery">
+                                    <option value="Incident Response Policy">Incident Response Policy</option>
+                                    <option value="Security Incident Handling Policy">Security Incident Handling Policy</option>
+                                    <option value="Business Continuity Policy">Business Continuity Policy</option>
+                                    <option value="Disaster Recovery Policy">Disaster Recovery Policy</option>
+                                    <option value="Crisis Management Policy">Crisis Management Policy</option>
+                                </optgroup>
+                                <optgroup label="Third-Party & Vendor Management">
+                                    <option value="Vendor Risk Management Policy">Vendor Risk Management Policy</option>
+                                    <option value="Third-Party Access Policy">Third-Party Access Policy</option>
+                                    <option value="Supplier Security Policy">Supplier Security Policy</option>
+                                    <option value="Contract Security Requirements Policy">Contract Security Requirements Policy</option>
+                                </optgroup>
+                                <optgroup label="Human Resources & Training">
+                                    <option value="Security Awareness Training Policy">Security Awareness Training Policy</option>
+                                    <option value="Personnel Security Policy">Personnel Security Policy</option>
+                                    <option value="Background Check Policy">Background Check Policy</option>
+                                    <option value="Termination Procedures Policy">Termination Procedures Policy</option>
+                                </optgroup>
+                                <optgroup label="Communication & Usage">
+                                    <option value="Acceptable Use Policy">Acceptable Use Policy</option>
+                                    <option value="Email Security Policy">Email Security Policy</option>
+                                    <option value="Internet Usage Policy">Internet Usage Policy</option>
+                                    <option value="Social Media Policy">Social Media Policy</option>
+                                    <option value="Remote Work Policy">Remote Work Policy</option>
+                                    <option value="Telework Policy">Telework Policy</option>
+                                </optgroup>
+                                <optgroup label="Physical & Environmental">
+                                    <option value="Physical Security Policy">Physical Security Policy</option>
+                                    <option value="Environmental Controls Policy">Environmental Controls Policy</option>
+                                    <option value="Facility Access Policy">Facility Access Policy</option>
+                                    <option value="Equipment Protection Policy">Equipment Protection Policy</option>
+                                </optgroup>
+                                <optgroup label="Compliance & Audit">
+                                    <option value="Compliance Management Policy">Compliance Management Policy</option>
+                                    <option value="Internal Audit Policy">Internal Audit Policy</option>
+                                    <option value="Security Assessment Policy">Security Assessment Policy</option>
+                                    <option value="Penetration Testing Policy">Penetration Testing Policy</option>
+                                    <option value="Risk Assessment Policy">Risk Assessment Policy</option>
+                                </optgroup>
+                                <optgroup label="Specialized Compliance">
+                                    <option value="HIPAA Security Policy">HIPAA Security Policy</option>
+                                    <option value="PCI DSS Compliance Policy">PCI DSS Compliance Policy</option>
+                                    <option value="GDPR Compliance Policy">GDPR Compliance Policy</option>
+                                    <option value="SOX IT Controls Policy">SOX IT Controls Policy</option>
+                                    <option value="CMMC Compliance Policy">CMMC Compliance Policy</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h4><i class="fas fa-server me-2"></i>Security Technology Stack</h4>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="platform_choice" class="form-label">Primary Platform *</label>
+                            <select class="form-select" id="platform_choice" name="platform_choice" required>
+                                <option value="">Select Platform</option>
+                                <option value="Microsoft 365 / Azure">Microsoft 365 / Azure</option>
+                                <option value="Google Workspace">Google Workspace</option>
+                                <option value="Hybrid (Microsoft & Google)">Hybrid (Microsoft & Google)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mdr_solution" class="form-label">Endpoint Protection</label>
+                            <select class="form-select" id="mdr_solution" name="mdr_solution">
+                                <option value="">Select MDR Solution</option>
+                                <option value="Sophos MDR" selected>Sophos MDR (Recommended)</option>
+                                <option value="Other MDR">Other MDR Solution</option>
+                                <option value="Traditional Antivirus">Traditional Antivirus Only</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="email_security" class="form-label">Email Security</label>
+                            <select class="form-select" id="email_security" name="email_security">
+                                <option value="">Select Email Security</option>
+                                <option value="Avanan Email Security">Avanan Email Security</option>
+                                <option value="Microsoft Defender">Microsoft Defender</option>
+                                <option value="Other Email Security">Other Solution</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="siem_solution" class="form-label">SIEM / Log Management</label>
+                            <select class="form-select" id="siem_solution" name="siem_solution">
+                                <option value="">Select SIEM</option>
+                                <option value="SIEM with SOC monitoring">SIEM with SOC monitoring</option>
+                                <option value="Basic log collection">Basic log collection</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="pam_solution" class="form-label">Privileged Access Management</label>
+                            <select class="form-select" id="pam_solution" name="pam_solution">
+                                <option value="">Select PAM</option>
+                                <option value="Senhasegura PAM" selected>Senhasegura PAM</option>
+                                <option value="Other PAM">Other PAM Solution</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="disk_encryption" class="form-label">Disk Encryption</label>
+                            <select class="form-select" id="disk_encryption" name="disk_encryption">
+                                <option value="">Select Encryption</option>
+                                <option value="BitLocker (Windows)" selected>BitLocker (Windows)</option>
+                                <option value="FileVault (macOS)">FileVault (macOS)</option>
+                                <option value="Both BitLocker and FileVault">Both BitLocker and FileVault</option>
+                                <option value="Other">Other Encryption</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mdm_computers" class="form-label">Computer Management</label>
+                            <select class="form-select" id="mdm_computers" name="mdm_computers">
+                                <option value="">Select Computer MDM</option>
+                                <option value="Microsoft Intune">Microsoft Intune</option>
+                                <option value="Other MDM">Other MDM Solution</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mdm_mobile" class="form-label">Mobile Device Management</label>
+                            <select class="form-select" id="mdm_mobile" name="mdm_mobile">
+                                <option value="">Select Mobile MDM</option>
+                                <option value="Microsoft Intune">Microsoft Intune</option>
+                                <option value="Other MDM">Other MDM Solution</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="security_training" class="form-label">Security Awareness Training</label>
+                            <select class="form-select" id="security_training" name="security_training">
+                                <option value="">Select Training</option>
+                                <option value="KnowBe4 Monthly Training">KnowBe4 Monthly Training</option>
+                                <option value="KnowBe4 Quarterly Training">KnowBe4 Quarterly Training</option>
+                                <option value="Other Training">Other Training Solution</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="phishing_tests" class="form-label">Phishing Tests</label>
+                            <select class="form-select" id="phishing_tests" name="phishing_tests">
+                                <option value="">Select Phishing Tests</option>
+                                <option value="Monthly Phishing Tests">Monthly Phishing Tests</option>
+                                <option value="Quarterly Phishing Tests">Quarterly Phishing Tests</option>
+                                <option value="Ad-hoc Testing">Ad-hoc Testing</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="vulnerability_scans" class="form-label">Vulnerability / Risk Scans</label>
+                            <select class="form-select" id="vulnerability_scans" name="vulnerability_scans">
+                                <option value="">Select Scan Frequency</option>
+                                <option value="Monthly Vulnerability Scans">Monthly Vulnerability Scans</option>
+                                <option value="Quarterly Vulnerability Scans">Quarterly Vulnerability Scans</option>
+                                <option value="Annual Scans">Annual Scans</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="dark_web_monitoring" class="form-label">Dark Web Monitoring</label>
+                            <select class="form-select" id="dark_web_monitoring" name="dark_web_monitoring">
+                                <option value="">Select Monitoring</option>
+                                <option value="DarkWebID Monitoring">DarkWebID Monitoring</option>
+                                <option value="Other Dark Web Monitoring">Other Dark Web Monitoring</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="mfa_solution" class="form-label">Multi-Factor Authentication</label>
+                            <select class="form-select" id="mfa_solution" name="mfa_solution">
+                                <option value="">Select MFA Type</option>
+                                <option value="Microsoft MFA">Microsoft MFA</option>
+                                <option value="Duo Security">Duo Security</option>
+                                <option value="Other MFA">Other MFA Solution</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="password_manager" class="form-label">Password Management</label>
+                            <select class="form-select" id="password_manager" name="password_manager">
+                                <option value="">Select Password Manager</option>
+                                <option value="LastPass Business">LastPass Business</option>
+                                <option value="Other Password Manager">Other Password Manager</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="intrusion_detection" class="form-label">Intrusion Detection / Network Security</label>
+                            <select class="form-select" id="intrusion_detection" name="intrusion_detection">
+                                <option value="">Select Network Security</option>
+                                <option value="Network Intrusion Detection System">Network Intrusion Detection System</option>
+                                <option value="Firewall with IDS/IPS">Firewall with IDS/IPS</option>
+                                <option value="Basic Firewall">Basic Firewall</option>
+                                <option value="None">None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="additional_tech" class="form-label">Additional Technology Notes</label>
+                            <textarea class="form-control" id="additional_tech" name="additional_tech" rows="2"
+                                    placeholder="Any additional security technologies or special configurations..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="compliance_requirements" class="form-label">Compliance Requirements</label>
+                        <select class="form-select" id="compliance_requirements" name="compliance_requirements">
+                            <option value="">Select Framework (Optional)</option>
+                            <optgroup label="NIST Frameworks">
+                                <option value="NIST Cybersecurity Framework">NIST Cybersecurity Framework</option>
+                                <option value="NIST 800-53 Rev. 5">NIST 800-53 Rev. 5</option>
+                                <option value="NIST 800-171">NIST 800-171</option>
+                                <option value="NIST Privacy Framework">NIST Privacy Framework</option>
+                            </optgroup>
+                            <optgroup label="SOC Compliance">
+                                <option value="SOC 2 Type I">SOC 2 Type I</option>
+                                <option value="SOC 2 Type II">SOC 2 Type II</option>
+                                <option value="SOC 1">SOC 1</option>
+                            </optgroup>
+                            <optgroup label="ISO Standards">
+                                <option value="ISO 27001">ISO 27001</option>
+                                <option value="ISO 27002">ISO 27002</option>
+                                <option value="ISO 27017">ISO 27017 (Cloud Security)</option>
+                                <option value="ISO 27018">ISO 27018 (Privacy)</option>
+                            </optgroup>
+                            <optgroup label="Healthcare & Privacy">
+                                <option value="HIPAA">HIPAA</option>
+                                <option value="HITECH">HITECH</option>
+                                <option value="GDPR">GDPR</option>
+                                <option value="CCPA">CCPA</option>
+                            </optgroup>
+                            <optgroup label="Financial & Payment">
+                                <option value="PCI DSS">PCI DSS</option>
+                                <option value="SOX">Sarbanes-Oxley (SOX)</option>
+                                <option value="GLBA">Gramm-Leach-Bliley Act</option>
+                                <option value="FFIEC">FFIEC</option>
+                            </optgroup>
+                            <optgroup label="Defense & Government">
+                                <option value="CMMC Level 1">CMMC Level 1</option>
+                                <option value="CMMC Level 2">CMMC Level 2</option>
+                                <option value="CMMC Level 3">CMMC Level 3</option>
+                                <option value="FedRAMP">FedRAMP</option>
+                                <option value="FISMA">FISMA</option>
+                            </optgroup>
+                            <optgroup label="Industry Standards">
+                                <option value="CIS Controls">CIS Controls</option>
+                                <option value="COBIT">COBIT</option>
+                                <option value="ITIL">ITIL</option>
+                            </optgroup>
+                            <optgroup label="SEC & Financial Reporting">
+                                <option value="SEC Cybersecurity Risk Guidance">SEC Cybersecurity Risk Guidance</option>
+                                <option value="SEC Rule 10b5-1">SEC Rule 10b5-1</option>
+                            </optgroup>
+                            <optgroup label="Multiple Frameworks">
+                                <option value="Multi-Framework Compliance">Multi-Framework Compliance</option>
+                                <option value="Custom Framework Mix">Custom Framework Mix</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-info-circle me-2"></i>MSP/MSSP:</strong> Crimson IT will be designated as your Managed Service Provider and Managed Security Service Provider in all generated policies.
+                    </div>
+                    <div class="mb-3">
+                        <label for="additional_requirements" class="form-label">Additional Requirements</label>
+                        <textarea class="form-control" id="additional_requirements" name="additional_requirements" rows="2"
+                                placeholder="Any specific requirements or considerations"></textarea>
+                    </div>
+                </div>
+
+                <!-- Save to IT Glue Section -->
+                <div class="form-section save-to-itglue-section" id="save_to_itglue_section" style="display: none;">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="save_to_itglue" name="save_to_itglue" value="true">
+                        <label class="form-check-label" for="save_to_itglue">
+                            <strong><i class="fas fa-cloud-upload-alt me-2"></i>Save Generated Policy to IT Glue</strong>
+                            <br>
+                            <small class="text-muted">
+                                The generated policy document will be automatically saved to this client's IT Glue account.
+                            </small>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-magic me-2"></i>Generate Policy Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-4">
+        <div class="container">
+            <p>&copy; 2025 Crimson IT. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        // IT Glue Integration JavaScript
+        $(document).ready(function() {
+            // Initialize Select2
+            $('#itglue_org_selector').select2({
+                theme: 'bootstrap-5',
+                placeholder: '-- Search for a client --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Load organizations
+            loadITGlueOrganizations();
+
+            // Handle organization selection
+            $('#itglue_org_selector').on('select2:select', function(e) {
+                var orgId = e.params.data.id;
+                if (orgId) {
+                    loadOrganizationProfile(orgId);
+                }
+            });
+
+            // Handle organization clear
+            $('#itglue_org_selector').on('select2:clear', function(e) {
+                clearAutoFilledFields();
+                $('#save_to_itglue_section').hide();
+                $('#itglue_org_id').val('');
+            });
+        });
+
+        function loadITGlueOrganizations() {
+            $('#loading-indicator').show();
+
+            $.ajax({
+                url: '/api/itglue/organizations',
+                method: 'GET',
+                success: function(response) {
+                    $('#loading-indicator').hide();
+
+                    if (response.success && response.organizations) {
+                        var $select = $('#itglue_org_selector');
+
+                        response.organizations.forEach(function(org) {
+                            var optionText = org.name;
+                            if (org.type) {
+                                optionText += ' (' + org.type + ')';
+                            }
+                            $select.append(new Option(optionText, org.id, false, false));
+                        });
+
+                        $select.trigger('change');
+                        console.log('Loaded ' + response.count + ' organizations from IT Glue');
+                    } else {
+                        console.error('Failed to load organizations:', response.error);
+                        showNotification('warning', 'Could not load IT Glue organizations. You can still enter client details manually.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#loading-indicator').hide();
+                    console.error('Error loading organizations:', error);
+                    showNotification('warning', 'IT Glue integration unavailable. You can still enter client details manually.');
+                }
+            });
+        }
+
+        function loadOrganizationProfile(orgId) {
+            showNotification('info', 'Loading client profile from IT Glue...');
+
+            $.ajax({
+                url: '/api/itglue/organization/' + orgId + '/profile',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.form_data) {
+                        populateFormFields(response.form_data);
+                        $('#itglue_org_id').val(orgId);
+                        $('#save_to_itglue_section').show();
+                        $('#save_to_itglue').prop('checked', true);
+                        showNotification('success', 'Client profile loaded successfully! Review and generate policy.');
+                        console.log('Loaded profile:', response.profile);
+                    } else {
+                        showNotification('error', 'Failed to load client profile: ' + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading profile:', error);
+                    showNotification('error', 'Error loading client profile. Please try again or enter manually.');
+                }
+            });
+        }
+
+        function populateFormFields(formData) {
+            var fields = ['client_name', 'industry', 'company_size', 'platform_choice', 'mdr_solution',
+                          'email_security', 'siem_solution', 'pam_solution', 'disk_encryption',
+                          'mdm_computers', 'mdm_mobile', 'security_training', 'phishing_tests',
+                          'vulnerability_scans', 'dark_web_monitoring', 'mfa_solution',
+                          'password_manager', 'intrusion_detection', 'compliance_requirements'];
+
+            fields.forEach(function(fieldName) {
+                if (formData[fieldName]) {
+                    var $field = $('#' + fieldName);
+                    $field.val(formData[fieldName]);
+                    $field.addClass('auto-populated');
+
+                    var $badge = $('#' + fieldName + '_badge');
+                    if ($badge.length) {
+                        $badge.show();
+                    }
+                }
+            });
+
+            $('html, body').animate({
+                scrollTop: $('#client_name').offset().top - 100
+            }, 500);
+        }
+
+        function clearAutoFilledFields() {
+            $('.auto-populated').removeClass('auto-populated');
+            $('.badge').hide();
+        }
+
+        function showNotification(type, message) {
+            var alertClass = 'alert-' + type;
+            var iconClass = type === 'success' ? 'fa-check-circle' :
+                           type === 'warning' ? 'fa-exclamation-triangle' :
+                           type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
+
+            var $alert = $('<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                          '<i class="fas ' + iconClass + ' me-2"></i>' + message +
+                          '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                          '</div>');
+
+            $('.policy-form').prepend($alert);
+
+            setTimeout(function() {
+                $alert.alert('close');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
