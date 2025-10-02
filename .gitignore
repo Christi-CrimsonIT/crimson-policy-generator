@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 *.so
 .Python
 build/
@@ -55,3 +56,5 @@ htmlcov/
 *.tmp
 temp/
 tmp/
+*.tar.gz
+*.zip
