@@ -1,0 +1,351 @@
+<!--
+CRIMSON POLICY GENERATOR 2.0 - KEY CHANGES TO index.html
+This snippet shows the NEW sections to add to your existing index.html
+
+Add these changes to create index_v2.html:
+1. Add Select2 CSS/JS for searchable dropdown
+2. Add IT Glue organization dropdown BEFORE client_name field
+3. Add JavaScript to load organizations and auto-populate form
+4. Add "Save to IT Glue" checkbox
+-->
+
+<!-- ========================================
+     SECTION 1: Add to <head> section
+     Add these CDN links for Select2
+     ======================================== -->
+<head>
+    <!-- Existing head content... -->
+
+    <!-- NEW: Select2 for searchable dropdown -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+    <style>
+        /* Style the Select2 dropdown to match Crimson IT theme */
+        .select2-container--bootstrap-5 .select2-selection {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            min-height: 48px;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            padding-left: 0;
+            color: #1f2937;
+        }
+
+        .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+            border-color: var(--crimson-primary);
+            box-shadow: 0 0 0 0.2rem rgba(127, 35, 70, 0.25);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid var(--crimson-primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .auto-populated {
+            background-color: rgba(58, 139, 107, 0.1) !important;
+            border-color: var(--accent-green) !important;
+        }
+
+        .save-to-itglue-section {
+            background: linear-gradient(135deg, rgba(58, 139, 107, 0.1) 0%, rgba(127, 35, 70, 0.05) 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(58, 139, 107, 0.3);
+        }
+    </style>
+</head>
+
+<!-- ========================================
+     SECTION 2: Replace the Client Information form section
+     Add this NEW section BEFORE the existing client_name field
+     ======================================== -->
+
+<div class="form-section">
+    <h4><i class="fas fa-building me-2"></i>Client Information</h4>
+
+    <!-- NEW: IT Glue Organization Selector -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info d-flex align-items-center">
+                <i class="fas fa-magic me-2"></i>
+                <strong>NEW in v2.0:</strong> Select a client from IT Glue to auto-populate all fields!
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <label for="itglue_org_selector" class="form-label">
+                <i class="fas fa-search me-2"></i>Search IT Glue Clients (Optional)
+            </label>
+            <select class="form-select" id="itglue_org_selector" name="itglue_org_selector">
+                <option value="">-- Select a client from IT Glue --</option>
+            </select>
+            <small class="form-text text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Start typing to search. Selecting a client will auto-fill all fields below with IT Glue data.
+            </small>
+            <div id="loading-indicator" style="display: none;">
+                <span class="loading-spinner"></span>
+                <span class="ms-2">Loading organizations from IT Glue...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden field to store selected org ID for saving back to IT Glue -->
+    <input type="hidden" id="itglue_org_id" name="itglue_org_id" value="">
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="client_name" class="form-label">
+                Client Name *
+                <span id="client_name_badge" class="badge bg-success ms-2" style="display: none;">
+                    <i class="fas fa-check"></i> Auto-filled
+                </span>
+            </label>
+            <input type="text" class="form-control" id="client_name" name="client_name" required>
+            <small class="form-text text-muted">Or enter manually if not in IT Glue</small>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="industry" class="form-label">
+                Industry *
+                <span id="industry_badge" class="badge bg-success ms-2" style="display: none;">
+                    <i class="fas fa-check"></i> Auto-filled
+                </span>
+            </label>
+            <select class="form-select" id="industry" name="industry" required>
+                <option value="">Select Industry</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Financial Services">Financial Services</option>
+                <option value="Manufacturing">Manufacturing</option>
+                <option value="Retail">Retail</option>
+                <option value="Technology">Technology</option>
+                <option value="Education">Education</option>
+                <option value="Legal">Legal</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="company_size" class="form-label">
+                Company Size *
+                <span id="company_size_badge" class="badge bg-success ms-2" style="display: none;">
+                    <i class="fas fa-check"></i> Auto-filled
+                </span>
+            </label>
+            <select class="form-select" id="company_size" name="company_size" required>
+                <option value="">Select Size</option>
+                <option value="Small (1-50 employees)">Small (1-50 employees)</option>
+                <option value="Medium (51-250 employees)">Medium (51-250 employees)</option>
+                <option value="Large (251-1000 employees)">Large (251-1000 employees)</option>
+                <option value="Enterprise (1000+ employees)">Enterprise (1000+ employees)</option>
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="policy_type" class="form-label">Policy Type *</label>
+            <select class="form-select" id="policy_type" name="policy_type" required>
+                <!-- Existing policy type options... -->
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================
+     SECTION 3: Add before the form submit button
+     NEW: Save to IT Glue option
+     ======================================== -->
+
+<div class="form-section save-to-itglue-section" id="save_to_itglue_section" style="display: none;">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="save_to_itglue" name="save_to_itglue" value="true">
+        <label class="form-check-label" for="save_to_itglue">
+            <strong><i class="fas fa-cloud-upload-alt me-2"></i>Save Generated Policy to IT Glue</strong>
+            <br>
+            <small class="text-muted">
+                The generated policy document will be automatically saved to this client's IT Glue account.
+            </small>
+        </label>
+    </div>
+</div>
+
+<!-- ========================================
+     SECTION 4: Add before closing </body> tag
+     JavaScript for IT Glue integration
+     ======================================== -->
+
+<!-- NEW: Select2 JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    // IT Glue Integration JavaScript for Policy Generator 2.0
+
+    $(document).ready(function() {
+        // Initialize Select2 on the organization dropdown
+        $('#itglue_org_selector').select2({
+            theme: 'bootstrap-5',
+            placeholder: '-- Search for a client --',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Load organizations from IT Glue when page loads
+        loadITGlueOrganizations();
+
+        // Handle organization selection
+        $('#itglue_org_selector').on('select2:select', function(e) {
+            var orgId = e.params.data.id;
+            if (orgId) {
+                loadOrganizationProfile(orgId);
+            }
+        });
+
+        // Handle organization clear
+        $('#itglue_org_selector').on('select2:clear', function(e) {
+            clearAutoFilledFields();
+            $('#save_to_itglue_section').hide();
+            $('#itglue_org_id').val('');
+        });
+    });
+
+    function loadITGlueOrganizations() {
+        $('#loading-indicator').show();
+
+        $.ajax({
+            url: '/api/itglue/organizations',
+            method: 'GET',
+            success: function(response) {
+                $('#loading-indicator').hide();
+
+                if (response.success && response.organizations) {
+                    // Populate dropdown with organizations
+                    var $select = $('#itglue_org_selector');
+
+                    response.organizations.forEach(function(org) {
+                        var optionText = org.name;
+                        if (org.type) {
+                            optionText += ' (' + org.type + ')';
+                        }
+
+                        $select.append(new Option(optionText, org.id, false, false));
+                    });
+
+                    // Refresh Select2
+                    $select.trigger('change');
+
+                    console.log('Loaded ' + response.count + ' organizations from IT Glue');
+                } else {
+                    console.error('Failed to load organizations:', response.error);
+                    showNotification('warning', 'Could not load IT Glue organizations. You can still enter client details manually.');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#loading-indicator').hide();
+                console.error('Error loading organizations:', error);
+                showNotification('warning', 'IT Glue integration unavailable. You can still enter client details manually.');
+            }
+        });
+    }
+
+    function loadOrganizationProfile(orgId) {
+        // Show loading state
+        showNotification('info', 'Loading client profile from IT Glue...');
+
+        $.ajax({
+            url: '/api/itglue/organization/' + orgId + '/profile',
+            method: 'GET',
+            success: function(response) {
+                if (response.success && response.form_data) {
+                    populateFormFields(response.form_data);
+
+                    // Store org ID for saving back to IT Glue
+                    $('#itglue_org_id').val(orgId);
+
+                    // Show save to IT Glue option
+                    $('#save_to_itglue_section').show();
+                    $('#save_to_itglue').prop('checked', true);
+
+                    showNotification('success', 'Client profile loaded successfully! Review and generate policy.');
+
+                    // Log the profile for debugging
+                    console.log('Loaded profile:', response.profile);
+                } else {
+                    showNotification('error', 'Failed to load client profile: ' + response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading profile:', error);
+                showNotification('error', 'Error loading client profile. Please try again or enter manually.');
+            }
+        });
+    }
+
+    function populateFormFields(formData) {
+        // Populate each field and mark as auto-filled
+        var fields = ['client_name', 'industry', 'company_size', 'platform_choice', 'mdr_solution',
+                      'email_security', 'siem_solution', 'pam_solution', 'disk_encryption',
+                      'mdm_computers', 'mdm_mobile', 'security_training', 'phishing_tests',
+                      'vulnerability_scans', 'dark_web_monitoring', 'mfa_solution',
+                      'password_manager', 'intrusion_detection', 'compliance_requirements'];
+
+        fields.forEach(function(fieldName) {
+            if (formData[fieldName]) {
+                var $field = $('#' + fieldName);
+                $field.val(formData[fieldName]);
+                $field.addClass('auto-populated');
+
+                // Show badge for main fields
+                var $badge = $('#' + fieldName + '_badge');
+                if ($badge.length) {
+                    $badge.show();
+                }
+            }
+        });
+
+        // Scroll to top of form so user can review
+        $('html, body').animate({
+            scrollTop: $('#client_name').offset().top - 100
+        }, 500);
+    }
+
+    function clearAutoFilledFields() {
+        // Remove auto-populated class and hide badges
+        $('.auto-populated').removeClass('auto-populated');
+        $('.badge').hide();
+    }
+
+    function showNotification(type, message) {
+        // Create Bootstrap alert
+        var alertClass = 'alert-' + type;
+        var iconClass = type === 'success' ? 'fa-check-circle' :
+                       type === 'warning' ? 'fa-exclamation-triangle' :
+                       type === 'error' ? 'fa-times-circle' : 'fa-info-circle';
+
+        var $alert = $('<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                      '<i class="fas ' + iconClass + ' me-2"></i>' + message +
+                      '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                      '</div>');
+
+        // Insert at top of form
+        $('.policy-form').prepend($alert);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(function() {
+            $alert.alert('close');
+        }, 5000);
+    }
+</script>
